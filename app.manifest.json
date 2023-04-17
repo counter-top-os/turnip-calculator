@@ -1,0 +1,4 @@
+{
+  "name": "Turnip Calculator",
+  "main": "./src/app.ts"
+}

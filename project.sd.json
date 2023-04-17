@@ -1,0 +1,9 @@
+{
+  "templates": ["./src/templates/main.std"],
+  "description": "Turnips in Animal Crossing",
+  "global_css": "./src/global.pss",
+  "docs": {
+    "value_sets": []
+  },
+  "package": {}
+}
