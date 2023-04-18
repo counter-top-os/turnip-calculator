@@ -21,7 +21,7 @@ jobs:
 
       - run: deno task build
 
-      - run: zip Release.zip * **/*
+      - run: zip -r Release.zip * **/*
 
       - name: Create Release
         id: create_release
