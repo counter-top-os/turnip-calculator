@@ -1,13 +1,310 @@
 <s:meta name="turn-main"> </s:meta>
 
 <script>
-  console.log("Hello world");
+  import { PATTERN } from "../app/pattern.ts";
+  let values = await Invoke("get:current_values");
+
+  function update(island, key) {
+    return async (event) => {
+      const value = event.Value;
+      if (!value) return;
+      await Invoke("update:value_point", island.id, key, parseInt(value));
+      values = await Invoke("get:current_values");
+    };
+  }
+
+  function rename_island(island) {
+    return async () => {
+      const name = prompt("Please name your island");
+      await Invoke("update:island_name", island.id, name);
+      values = await Invoke("get:current_values");
+    };
+  }
+
+  SetMenus([
+    {
+      name: "File",
+      items: [
+        {
+          name: "Create Island",
+          onclick: async () => {
+            const name = prompt("Please name your island");
+            await Invoke("create:island", name);
+            values = await Invoke("get:current_values");
+            self.should_render();
+          },
+        },
+      ],
+    },
+  ]);
+
+  const name_map = {
+    [PATTERN.FLUCTUATING]: "Fluctuating",
+    [PATTERN.LARGE_SPIKE]: "Large Spike",
+    [PATTERN.DECREASING]: "Decreasing",
+    [PATTERN.SMALL_SPIKE]: "Small Spike",
+  };
+
+  function format_island_data(island) {
+    return Object.keys(island?.predictions?.patterns ?? {})
+      .map((p) => [p, island.predictions.patterns[p]])
+      .filter(([name, value]) => value.probability > 0)
+      .map(([name, value]) => ({
+        pattern: name_map[name],
+        probability: (value.probability * 100).toFixed(2) + "%",
+        table: [
+          {
+            name: "Total",
+            range: `${value.week_min}-${value.week_max}`,
+            week: value.prices.map((p) => `${p.min}-${p.max}`),
+          },
+          ...value.options
+            .sort((a, b) => a.probability - b.probability)
+            .map((o) => ({
+              name: (o.probability * 100).toFixed(2) + "%",
+              range: `${o.week_min}-${o.week_max}`,
+              week: o.prices.map((p) => `${p.min}-${p.max}`),
+            })),
+        ],
+      }));
+  }
 </script>
 
 <style>
-  :host {
-    color: red;
+  t-heading {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  t-heading f-button {
+    margin: 0 1rem;
+  }
+
+  .extra-number {
+    display: inline-block;
+    margin: 0 0.5rem;
   }
 </style>
 
-<div>Hello world</div>
+<div>
+  <l-row>
+    <s:for subject=":values" key="island">
+      <l-col xs="12" xl="6">
+        <l-row>
+          <l-col xs="12">
+            <t-heading level="h4">
+              <s:text use=":island.name" />
+
+              <span>
+                <f-button type="button" on:click="rename_island(island)">
+                  <t-icon name="edit" size="h6" colour="primary" text></t-icon>
+                </f-button>
+              </span>
+            </t-heading>
+          </l-col>
+          <l-col xs="12">
+            <t-crumbs divider=">">
+              <s:for subject=":island.history" key="item">
+                <span><s:text use=":item" /></span>
+              </s:for>
+            </t-crumbs>
+          </l-col>
+          <l-col xs="12">
+            <f-numeric
+              decimal-places="0"
+              no-negative
+              prefill=":island.buy?.toString()"
+              on:ValueChanged="update(island, 'buy')"
+            >
+              Buy Price
+            </f-numeric>
+          </l-col>
+          <l-col xs="12" md="6">
+            <f-numeric
+              decimal-places="0"
+              no-negative
+              prefill=":island.monday_am?.toString()"
+              on:ValueChanged="update(island, 'monday_am')"
+            >
+              Monday AM
+            </f-numeric>
+          </l-col>
+          <l-col xs="12" md="6">
+            <f-numeric
+              decimal-places="0"
+              no-negative
+              prefill=":island.monday_pm?.toString()"
+              on:ValueChanged="update(island, 'monday_pm')"
+            >
+              Monday PM
+            </f-numeric>
+          </l-col>
+          <l-col xs="12" md="6">
+            <f-numeric
+              decimal-places="0"
+              no-negative
+              prefill=":island.tuesday_am?.toString()"
+              on:ValueChanged="update(island, 'tuesday_am')"
+            >
+              Tuesday AM
+            </f-numeric>
+          </l-col>
+          <l-col xs="12" md="6">
+            <f-numeric
+              decimal-places="0"
+              no-negative
+              prefill=":island.tuesday_pm?.toString()"
+              on:ValueChanged="update(island, 'tuesday_pm')"
+            >
+              Tuesday PM
+            </f-numeric>
+          </l-col>
+          <l-col xs="12" md="6">
+            <f-numeric
+              decimal-places="0"
+              no-negative
+              prefill=":island.wednesday_am?.toString()"
+              on:ValueChanged="update(island, 'wednesday_am')"
+            >
+              Wednesday AM
+            </f-numeric>
+          </l-col>
+          <l-col xs="12" md="6">
+            <f-numeric
+              decimal-places="0"
+              no-negative
+              prefill=":island.wednesday_pm?.toString()"
+              on:ValueChanged="update(island, 'wednesday_pm')"
+            >
+              Wednesday PM
+            </f-numeric>
+          </l-col>
+          <l-col xs="12" md="6">
+            <f-numeric
+              decimal-places="0"
+              no-negative
+              prefill=":island.thursday_am?.toString()"
+              on:ValueChanged="update(island, 'thursday_am')"
+            >
+              Thursday AM
+            </f-numeric>
+          </l-col>
+          <l-col xs="12" md="6">
+            <f-numeric
+              decimal-places="0"
+              no-negative
+              prefill=":island.thursday_pm?.toString()"
+              on:ValueChanged="update(island, 'thursday_pm')"
+            >
+              Thursday PM
+            </f-numeric>
+          </l-col>
+          <l-col xs="12" md="6">
+            <f-numeric
+              decimal-places="0"
+              no-negative
+              prefill=":island.friday_am?.toString()"
+              on:ValueChanged="update(island, 'friday_am')"
+            >
+              Friday AM
+            </f-numeric>
+          </l-col>
+          <l-col xs="12" md="6">
+            <f-numeric
+              decimal-places="0"
+              no-negative
+              prefill=":island.friday_pm?.toString()"
+              on:ValueChanged="update(island, 'friday_pm')"
+            >
+              Friday PM
+            </f-numeric>
+          </l-col>
+          <l-col xs="12" md="6">
+            <f-numeric
+              decimal-places="0"
+              no-negative
+              prefill=":island.saturday_am?.toString()"
+              on:ValueChanged="update(island, 'saturday_am')"
+            >
+              Saturday AM
+            </f-numeric>
+          </l-col>
+          <l-col xs="12" md="6">
+            <f-numeric
+              decimal-places="0"
+              no-negative
+              prefill=":island.saturday_pm?.toString()"
+              on:ValueChanged="update(island, 'saturday_pm')"
+            >
+              Saturday PM
+            </f-numeric>
+          </l-col>
+          <l-col xs="12">
+            <d-card>
+              <span slot="title">Totals</span>
+              <t-paragraph>
+                <b>Maximum:</b>
+                <span class="extra-number">
+                  <s:text
+                    use=":island.predictions?.totals?.week_max?.toString() ?? ''"
+                  />
+                </span>
+                <b>Minimum:</b>
+                <span class="extra-number">
+                  <s:text
+                    use=":island.predictions?.totals?.week_min?.toString() ?? ''"
+                  />
+                </span>
+              </t-paragraph>
+            </d-card>
+          </l-col>
+          <s:for subject=":format_island_data(island)" key="data">
+            <l-col xs="12">
+              <t-heading level="h6">
+                <s:text use=":data.pattern" />
+                <small class="extra-number">
+                  <s:text use=":data.probability" />
+                </small>
+              </t-heading>
+              <l-table use=":data.table">
+                <l-table-row slot="head">
+                  <l-table-cell>Chance</l-table-cell>
+                  <l-table-cell>Monday AM</l-table-cell>
+                  <l-table-cell>Monday PM</l-table-cell>
+                  <l-table-cell>Tuesday AM</l-table-cell>
+                  <l-table-cell>Tuesday PM</l-table-cell>
+                  <l-table-cell>Wednesday AM</l-table-cell>
+                  <l-table-cell>Wednesday PM</l-table-cell>
+                  <l-table-cell>Thursday AM</l-table-cell>
+                  <l-table-cell>Thursday PM</l-table-cell>
+                  <l-table-cell>Friday AM</l-table-cell>
+                  <l-table-cell>Friday PM</l-table-cell>
+                  <l-table-cell>Saturday AM</l-table-cell>
+                  <l-table-cell>Saturday PM</l-table-cell>
+                  <l-table-cell>Week Totals</l-table-cell>
+                </l-table-row>
+                <l-table-row>
+                  <l-table-cell use="row.name" />
+                  <l-table-cell use="row.week[2]" />
+                  <l-table-cell use="row.week[3]" />
+                  <l-table-cell use="row.week[4]" />
+                  <l-table-cell use="row.week[5]" />
+                  <l-table-cell use="row.week[6]" />
+                  <l-table-cell use="row.week[7]" />
+                  <l-table-cell use="row.week[8]" />
+                  <l-table-cell use="row.week[9]" />
+                  <l-table-cell use="row.week[10]" />
+                  <l-table-cell use="row.week[11]" />
+                  <l-table-cell use="row.week[12]" />
+                  <l-table-cell use="row.week[13]" />
+                  <l-table-cell use="row.range" />
+                </l-table-row>
+              </l-table>
+            </l-col>
+          </s:for>
+        </l-row>
+      </l-col>
+    </s:for>
+  </l-row>
+</div>
