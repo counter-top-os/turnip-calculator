@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "install": "deno install --allow-all https://deno.land/x/wholemeal@1.0.6/main.ts && deno install --allow-read --allow-write -n counter_top_app_dev https://deno.land/x/counter_top@0.0.10/main.ts",
+    "install": "deno install --allow-all https://deno.land/x/wholemeal@1.0.6/main.ts && deno install --allow-read --allow-write -n counter_top_app_dev https://deno.land/x/counter_top@0.0.10/app_dev.ts",
     "build": "wholemeal build",
     "dev": "wholemeal dev",
     "dev:install": "counter_top_app_dev"
