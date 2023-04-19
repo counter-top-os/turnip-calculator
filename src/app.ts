@@ -59,13 +59,7 @@ const Server = CreateAppServer(
     }),
   },
   {},
-  ({ OpenWindow, UserState, EndApp }) => {
-    OpenWindow("index.html", "Turnips", {
-      top: "50px",
-      left: "50px",
-      width: "800px",
-      height: "600px",
-    }).then(() => EndApp());
+  ({ OpenWindow, UserState }) => {
     function CurrentWeek() {
       const now = new Date().getTime();
       return Math.floor((now + 345_600_000) / 604_800_000);
@@ -82,6 +76,7 @@ const Server = CreateAppServer(
     }
 
     return {
+      OpenWindow,
       UserState,
       /** Gets the number of weeks since the epoch */
       get CurrentWeek() {
@@ -129,6 +124,15 @@ const Server = CreateAppServer(
     };
   }
 );
+
+Server.CreateHandler("system:focus", ({ OpenWindow }) => {
+  OpenWindow("index.html", "Turnips", {
+    top: "50px",
+    left: "50px",
+    width: "800px",
+    height: "600px",
+  });
+});
 
 Server.CreateHandler("get:previous_week", ({ UserState, CurrentWeek }) => {
   return UserState.Model.previous_weeks[(CurrentWeek - 1).toString()];
